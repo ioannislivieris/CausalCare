@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CausalCare · Insurance Coverage Effect</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --teal:#0F6E56;--teal-l:#1D9E75;--teal-d:#085041;--teal-pale:#E1F5EE;
+  --amber:#BA7517;--amber-pale:#FAEEDA;
+  --slate:#2C2C2A;--slate-pale:#F1EFE8;
+  --text-p:#1a1a18;--text-s:#5F5E5A;
+  --border:rgba(0,0,0,0.12);--card-bg:#ffffff;--body-bg:#F6F5F2;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--body-bg);color:var(--text-p);min-height:100vh;}
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2rem;gap:1rem;flex-wrap:wrap;}
+.logo-row{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.ld{width:10px;height:10px;border-radius:50%;background:var(--teal);display:inline-block;}
+.ld2{width:10px;height:10px;border-radius:50%;background:var(--amber);display:inline-block;}
+.app-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--text-p);letter-spacing:-0.3px;}
+.app-sub{font-size:12px;color:var(--text-s);font-family:'DM Mono',monospace;letter-spacing:0.5px;}
+.badge{font-size:11px;font-family:'DM Mono',monospace;padding:4px 10px;border-radius:20px;letter-spacing:0.4px;}
+.bl{background:var(--teal-pale);color:var(--teal-d);border:0.5px solid #9FE1CB;}
+.bm{background:var(--amber-pale);color:#633806;border:0.5px solid #FAC775;}
+.tab-row{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1.5px solid var(--border);}
+.tab{font-size:13px;font-weight:400;padding:8px 18px;cursor:pointer;color:var(--text-s);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:color 0.15s;background:none;border-top:none;border-left:none;border-right:none;}
+.tab:hover{color:var(--text-p);}
+.tab.active{color:var(--teal);font-weight:500;border-bottom-color:var(--teal);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.ga{display:grid;grid-template-columns:1fr 320px;gap:1rem;}
+@media(max-width:720px){.g2,.g3,.ga{grid-template-columns:1fr;}}
+.card{background:var(--card-bg);border-radius:12px;border:0.5px solid var(--border);padding:1rem 1.25rem;}
+.ch{font-size:11px;color:var(--text-s);letter-spacing:0.8px;font-family:'DM Mono',monospace;margin-bottom:0.75rem;text-transform:uppercase;}
+.mb{font-size:26px;font-weight:500;font-family:'Playfair Display',serif;color:var(--text-p);line-height:1;}
+.mu{font-size:12px;color:var(--text-s);font-family:'DM Mono',monospace;margin-top:4px;}
+.md{font-size:12px;font-family:'DM Mono',monospace;margin-top:6px;color:var(--teal);}
+.dv{height:0.5px;background:var(--border);margin:0.75rem 0;}
+.pill{display:inline-flex;align-items:center;font-size:11px;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;}
+.pt{background:var(--teal-pale);color:var(--teal-d);}
+.ps{background:var(--slate-pale);color:var(--slate);}
+.sl{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-s);margin-bottom:10px;}
+.field{display:flex;flex-direction:column;gap:4px;}
+.field label{font-size:11px;color:var(--text-s);font-family:'DM Mono',monospace;letter-spacing:0.5px;}
+.field select,.field input[type=range]{width:100%;}
+.field select{padding:6px 8px;border:0.5px solid var(--border);border-radius:6px;background:var(--card-bg);font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-p);}
+.rv{font-size:12px;font-weight:500;color:var(--text-p);font-family:'DM Mono',monospace;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.pbtn{width:100%;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:12px;transition:background 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.pbtn:hover{background:var(--teal-d);}
+.pbtn:disabled{background:#B4B2A9;cursor:not-allowed;}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.oi{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.ol{font-size:12px;color:var(--text-s);line-height:1.4;}
+.ol strong{font-weight:500;color:var(--text-p);}
+.bb{height:7px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:3px;}
+.bf{height:7px;border-radius:4px;transition:width 0.6s ease;}
+.bv{font-size:12px;font-family:'DM Mono',monospace;font-weight:500;color:var(--text-p);min-width:70px;text-align:right;}
+.tc{display:none;}
+.tc.active{display:block;}
+.fc{background:var(--card-bg);border-radius:10px;border:0.5px solid var(--border);padding:0.875rem 1rem;margin-bottom:8px;}
+.ft{font-size:13px;font-weight:500;color:var(--text-p);margin-bottom:4px;}
+.fb{font-size:12px;color:var(--text-s);line-height:1.65;}
+.stat-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;}
+.stat{background:var(--body-bg);border-radius:8px;padding:10px 14px;flex:1;min-width:110px;}
+.stat-val{font-size:18px;font-weight:500;font-family:'Playfair Display',serif;color:var(--text-p);}
+.stat-key{font-size:10px;color:var(--text-s);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;}
+.prose{font-size:13px;color:var(--text-s);line-height:1.75;}
+.err{background:#FCEBEB;border:0.5px solid #F09595;border-radius:8px;padding:10px 14px;font-size:12px;color:#A32D2D;font-family:'DM Mono',monospace;margin-top:10px;display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div>
+      <div class="logo-row"><span class="ld"></span><span class="ld2"></span><span class="app-title" style="margin-left:4px;">CausalCare</span></div>
+      <div class="app-sub">Treatment Effect Estimation · MEPS 2022 · C-XGBoost</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span class="badge bl">● live model</span>
+      <span class="badge bm">MEPS 2022</span>
+    </div>
+  </div>
+
+  <div class="tab-row">
+    <button class="tab active" onclick="sw('estimator')">Individual estimator</button>
+    <button class="tab" onclick="sw('overview')">Problem overview</button>
+  </div>
+
+  <!-- TAB 1: Estimator -->
+  <div class="tc active" id="tab-estimator">
+    <div class="g2" style="margin-bottom:1rem;">
+      <div class="card">
+        <div class="ch">Average Treatment Effect (ATE)</div>
+        <div class="mb">+$2,144</div>
+        <div class="mu">per person · insured vs. uninsured · ages 25–64</div>
+        <div class="md">↑ estimated increase in healthcare utilization</div>
+      </div>
+      <div class="card">
+        <div class="ch">Study population</div>
+        <div class="mb">7,290</div>
+        <div class="mu">U.S. adults · MEPS 2022 · ages 25–64</div>
+        <div class="mu" style="margin-top:2px;">n = 6,169 insured · n = 1,121 uninsured</div>
+      </div>
+    </div>
+
+    <div class="ga">
+      <div>
+        <div class="card">
+          <div class="ch">Patient profile · individual effect estimator</div>
+          <div class="sl">Demographics</div>
+          <div class="fr">
+            <div class="field"><label>Age</label><input type="range" min="25" max="64" value="42" id="age1" step="1" oninput="upd()"><span class="rv" id="age1v">42 yrs</span></div>
+            <div class="field"><label>Sex</label><select id="sex1"><option value="0">Male</option><option value="1" selected>Female</option></select></div>
+          </div>
+          <div class="fr">
+            <div class="field"><label>Race / ethnicity</label><select id="race1"><option value="1">Hispanic</option><option value="2" selected>Non-Hisp. White</option><option value="3">Non-Hisp. Black</option><option value="4">Non-Hisp. Asian</option><option value="5">Other</option></select></div>
+            <div class="field"><label>Education (years)</label><input type="range" min="0" max="20" value="14" id="edu1" step="1" oninput="upd()"><span class="rv" id="edu1v">14 yrs</span></div>
+          </div>
+          <div class="dv"></div>
+          <div class="sl">Socioeconomic &amp; health</div>
+          <div class="fr">
+            <div class="field"><label>Income level</label><select id="pov1"><option value="1">Poor / negative income</option><option value="2">Near poor</option><option value="3" selected>Low income</option><option value="4">Middle income</option><option value="5">High income</option></select></div>
+            <div class="field"><label>Employment</label><select id="emp1"><option value="1" selected>Employed</option><option value="2">Unemployed</option><option value="3">Not in labor force</option></select></div>
+          </div>
+          <div class="fr">
+            <div class="field"><label>Self-reported health</label><select id="srh1"><option value="1">Excellent</option><option value="2" selected>Very good</option><option value="3">Good</option><option value="4">Fair</option><option value="5">Poor</option></select></div>
+            <div class="field"><label>Census region</label><select id="reg1"><option value="1">Northeast</option><option value="2" selected>Midwest</option><option value="3">South</option><option value="4">West</option></select></div>
+          </div>
+          <div class="dv"></div>
+          <div class="sl">Chronic conditions</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="c_hd"> Heart disease</label>
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="c_db" checked> Diabetes</label>
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="c_ht" checked> Hypertension</label>
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="c_as"> Asthma</label>
+            <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="c_ca"> Cancer</label>
+          </div>
+          <button class="pbtn" id="predict-btn" onclick="predict()">
+            <span id="btn-text">Estimate individual treatment effect →</span>
+            <span class="spinner" id="spinner"></span>
+          </button>
+          <div class="err" id="err-box"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="ch">Individual treatment effect estimate</div>
+          <div id="res-empty" style="font-size:12px;color:var(--text-s);padding:2.5rem 0;text-align:center;font-family:'DM Mono',monospace;line-height:1.8;">Fill in the patient profile<br>and press the button<br>to see the individual estimate.</div>
+          <div id="res" style="display:none;">
+            <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px;">
+              <span id="cate-val" style="font-size:30px;font-family:'Playfair Display',serif;font-weight:600;color:var(--teal-d);"></span>
+              <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--teal-d);">individual effect</span>
+            </div>
+            <div id="cate-interp" style="font-size:12px;color:var(--text-s);line-height:1.6;margin-bottom:12px;"></div>
+            <div class="dv"></div>
+            <div style="margin-top:10px;">
+              <div class="oi">
+                <div class="ol"><strong>Expected spending without insurance</strong> — estimated annual expenditure if this patient remains uninsured</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+                  <div class="bb" style="flex:1;margin-right:10px;"><div class="bf" id="bar-mu0" style="background:#B4B2A9;"></div></div>
+                  <span class="bv" id="mu0-val"></span>
+                </div>
+              </div>
+              <div class="oi">
+                <div class="ol"><strong>Expected spending with insurance</strong> — estimated annual expenditure if this patient is covered</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+                  <div class="bb" style="flex:1;margin-right:10px;"><div class="bf" id="bar-mu1" style="background:var(--teal-l);"></div></div>
+                  <span class="bv" id="mu1-val"></span>
+                </div>
+              </div>
+              <div class="oi">
+                <div class="ol"><strong>Likelihood of being insured</strong> — probability that a patient with this profile has insurance, based on population data</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+                  <div class="bb" style="flex:1;margin-right:10px;"><div class="bf" id="bar-prop" style="background:var(--amber);"></div></div>
+                  <span class="bv" id="prop-val"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Overview -->
+  <div class="tc" id="tab-overview">
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ch">Research question</div>
+      <div class="prose">What is the causal effect of health insurance coverage (insured vs. uninsured) on total annual medical expenditure among U.S. working-age adults (25–64)? Using data from the Medical Expenditure Panel Survey (MEPS) 2022, we apply causal machine learning to isolate the true effect of coverage from confounding factors such as age, income, and health status — producing individual-level Conditional Average Treatment Effect (CATE) estimates that vary across patient profiles.</div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ch">Model results · C-XGBoost</div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val">+$2,144</div><div class="stat-key">Average Treatment Effect (ATE)</div></div>
+        <div class="stat"><div class="stat-val">7,290</div><div class="stat-key">Analytic sample</div></div>
+        <div class="stat"><div class="stat-val">661x</div><div class="stat-key">Placebo test ratio</div></div>
+        <div class="stat"><div class="stat-val">3.37</div><div class="stat-key">E-value</div></div>
+      </div>
+      <div class="dv"></div>
+      <div class="sl">Causal assumption verification</div>
+      <div class="g2" style="margin-bottom:0;">
+        <div>
+          <div class="fc"><div class="ft">Positivity ✅</div><div class="fb">Age restriction to 25–64, propensity score trimming at e(x) ∈ [0.05, 0.95], and IPW weighting achieved SMD &lt; 0.1 for all 13 covariates.</div></div>
+          <div class="fc"><div class="ft">Unconfoundedness ✅</div><div class="fb">Placebo test ratio of 661x confirms genuine causal signal. E-value of 3.37 indicates an unmeasured confounder would need RR ≥ 3.37 to fully explain away the effect.</div></div>
+        </div>
+        <div>
+          <div class="fc"><div class="ft">SUTVA ✅</div><div class="fb">No interference assumption is plausible at individual level. Treatment is defined as coverage as distributed in the 2022 U.S. population — a policy-relevant estimand.</div></div>
+          <div class="fc"><div class="ft">Consistency ✅</div><div class="fb">Satisfied conditional on the policy-relevant estimand definition. Observed outcomes equal potential outcomes under the well-defined treatment.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="ch">Policy recommendations</div>
+      <div class="fc" style="margin-bottom:8px;"><div class="ft">What the numbers mean in practice</div><div class="fb">Health insurance increases access to and use of healthcare services by approximately $400 per person per year — translating to more visits, treatments, and care, especially for those currently avoiding care due to cost.</div></div>
+      <div class="fc" style="margin-bottom:8px;"><div class="ft">Is the effect the same for everyone?</div><div class="fb">The model shows a broadly positive effect across the population without strong individualization, meaning that expanding insurance coverage will have a generally beneficial impact without needing to target specific subgroups.</div></div>
+      <div class="fc" style="margin-bottom:8px;"><div class="ft">Who benefits most?</div><div class="fb">Models with better heterogeneity capture (Random Forest, C-XGBoost) suggest that individuals with poorer health status and lower income are likely to benefit more, though the top model does not clearly delineate specific subgroups.</div></div>
+      <div class="fc"><div class="ft">Population-level impact</div><div class="fb">Expanding coverage to the uninsured (5.5% of the population) is expected to substantially increase total access to care — reducing cost-driven avoidance and improving population health outcomes.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="ch">Data · MEPS 2022</div>
+      <div class="prose" style="margin-bottom:10px;">The model was trained on the Medical Expenditure Panel Survey (MEPS) 2022, a nationally representative survey of U.S. civilian non-institutionalized adults conducted by AHRQ. The outcome variable (TOTEXP22) was winsorized at the 99th percentile ($93,768) and log-transformed (log1p) to address skewness. The analytic sample covers working-age adults aged 25–64 after positivity enforcement.</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="pill ps">Age</span><span class="pill ps">Sex</span><span class="pill ps">Race / ethnicity</span><span class="pill ps">Education</span><span class="pill ps">Income level</span><span class="pill ps">Employment</span><span class="pill ps">Region</span><span class="pill ps">Self-reported health</span><span class="pill ps">Heart disease</span><span class="pill ps">Diabetes</span><span class="pill ps">Hypertension</span><span class="pill ps">Asthma</span><span class="pill ps">Cancer</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ── CONFIG: replace with your HuggingFace Space URL after deployment ── */
+  const API_BASE = "https://livieris-causalcare.hf.space";
+
+  function sw(id){
+    document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['estimator','overview'][i]===id));
+    document.querySelectorAll('.tc').forEach(c=>c.classList.toggle('active',c.id==='tab-'+id));
+  }
+  function upd(){
+    document.getElementById('age1v').textContent=document.getElementById('age1').value+' yrs';
+    document.getElementById('edu1v').textContent=document.getElementById('edu1').value+' yrs';
+  }
+  function fmtUSD(v){return(v<0?'−$':'$')+Math.abs(Math.round(v)).toLocaleString();}
+  function fmtPct(v){return Math.round(v*100)+'%';}
+
+  async function predict(){
+    const btn  = document.getElementById('predict-btn');
+    const spin = document.getElementById('spinner');
+    const btxt = document.getElementById('btn-text');
+    const errBox = document.getElementById('err-box');
+
+    btn.disabled=true; spin.style.display='block'; btxt.textContent='Estimating...'; errBox.style.display='none';
+
+    const payload = {
+      age:           +document.getElementById('age1').value,
+      sex:           +document.getElementById('sex1').value,
+      race_eth:      +document.getElementById('race1').value,
+      education_yrs: +document.getElementById('edu1').value,
+      poverty_cat:   +document.getElementById('pov1').value,
+      employ_status: +document.getElementById('emp1').value,
+      region:        +document.getElementById('reg1').value,
+      self_health:   +document.getElementById('srh1').value,
+      heart_disease: document.getElementById('c_hd').checked ? 1 : 0,
+      diabetes:      document.getElementById('c_db').checked ? 1 : 0,
+      hypertension:  document.getElementById('c_ht').checked ? 1 : 0,
+      asthma:        document.getElementById('c_as').checked ? 1 : 0,
+      cancer:        document.getElementById('c_ca').checked ? 1 : 0,
+    };
+
+    try {
+      const resp = await fetch(`${API_BASE}/predict/coverage`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error(`Server error: ${resp.status}`);
+      const data = await resp.json();
+
+      const cate = data.cate;
+      const y0   = data.y0_hat;
+      const y1   = data.y1_hat;
+      const ps   = data.propensity_score;
+      const mx   = Math.max(y0, y1);
+
+      document.getElementById('res-empty').style.display='none';
+      document.getElementById('res').style.display='block';
+      document.getElementById('cate-val').textContent=fmtUSD(cate);
+      document.getElementById('cate-interp').textContent=data.interpretation;
+      document.getElementById('mu0-val').textContent=fmtUSD(y0);
+      document.getElementById('mu1-val').textContent=fmtUSD(y1);
+      document.getElementById('bar-mu0').style.width=Math.round(y0/mx*92)+'%';
+      document.getElementById('bar-mu1').style.width=Math.round(y1/mx*92)+'%';
+      document.getElementById('prop-val').textContent=fmtPct(ps);
+      document.getElementById('bar-prop').style.width=Math.round(ps*92)+'%';
+
+    } catch(e) {
+      errBox.style.display='block';
+      errBox.textContent='Could not reach the model API. Please try again later. ('+ e.message +')';
+    } finally {
+      btn.disabled=false; spin.style.display='none'; btxt.textContent='Estimate individual treatment effect →';
+    }
+  }
+</script>
+</body>
+</html>
